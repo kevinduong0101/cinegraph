@@ -19,7 +19,7 @@ flowchart TD
     HyDE -.->|Context| CE
 
     CE --> Graph["🕸️ NetworkX DiGraph<br>2-Hop Entity Traversal"]
-    Graph --> Synthesis["🤖 Grounded Generator<br>Gemini 2.5 Flash Lite"]
+    Graph --> Synthesis["🤖 Grounded Generator<br>Gemini 3.5 Flash Lite"]
 
     Synthesis --> Stream["⚡ NDJSON Streaming Protocol<br>Chunk 1: Metadata & Chunks 2..N: Tokens"]
     Stream --> UI["💻 Streamlit Executive Dashboard"]
