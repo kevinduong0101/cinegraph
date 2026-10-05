@@ -8,21 +8,21 @@
 
 ```mermaid
 flowchart TD
-    User([👤 User Query]) --> HyDE[🧠 HyDE Expansion<br>Gemini Flash]
-    User --> BM25[⚡ BM25Okapi<br>Lexical Search]
-    HyDE --> Voyage[🌐 Voyage-3 Dense Vector<br>Semantic Search]
+    User(["👤 User Query"]) --> HyDE["🧠 HyDE Expansion<br>Gemini Flash"]
+    User --> BM25["⚡ BM25Okapi<br>Lexical Search"]
+    HyDE --> Voyage["🌐 Voyage-3 Dense Vector<br>Semantic Search"]
 
-    BM25 --> RRF[🔀 Reciprocal Rank Fusion<br>k=60]
+    BM25 --> RRF["🔀 Reciprocal Rank Fusion<br>k=60"]
     Voyage --> RRF
 
-    RRF --> CE[🎯 Cross-Encoder Re-ranker<br>ms-marco-MiniLM-L-6-v2]
-    HyDE -. Context .-> CE
+    RRF --> CE["🎯 Cross-Encoder Re-ranker<br>ms-marco-MiniLM-L-6-v2"]
+    HyDE -.->|Context| CE
 
-    CE --> Graph[🕸️ NetworkX DiGraph<br>2-Hop Entity Traversal]
-    Graph --> Synthesis[🤖 Grounded Generator<br>Gemini 2.5 Flash Lite]
+    CE --> Graph["🕸️ NetworkX DiGraph<br>2-Hop Entity Traversal"]
+    Graph --> Synthesis["🤖 Grounded Generator<br>Gemini 2.5 Flash Lite"]
 
-    Synthesis --> Stream[⚡ NDJSON Streaming Protocol<br>Chunk 1: Metadata | Chunks 2..N: Tokens]
-    Stream --> UI[💻 Streamlit Executive Dashboard]
+    Synthesis --> Stream["⚡ NDJSON Streaming Protocol<br>Chunk 1: Metadata & Chunks 2..N: Tokens"]
+    Stream --> UI["💻 Streamlit Executive Dashboard"]
 ```
 
 ---
