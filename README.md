@@ -31,11 +31,11 @@ flowchart TD
 
 Evaluated on realistic multi-intent movie queries (abstract concepts, character descriptions, lexical traps):
 
-| Retrieval Strategy                     | Hit Rate@3 |   MRR@3   | Architecture Profile                            |
-| :------------------------------------- | :--------: | :-------: | :---------------------------------------------- |
-| **1. Naive BM25 (Lexical Only)**       |   66.7%    |   0.667   | Fails on abstract ideas / vocabulary mismatch   |
-| **2. Naive Dense Vector (Voyage-3)**   |   100.0%   |   1.000   | Semantic vector match, higher latency           |
-| **3. CineGraph Intel (Full Pipeline)** | **100.0%** | **1.000** | **HyDE + RRF + Cross-Encoder + Fault Fallback** |
+| Cấu hình Retrieval (Ablation)              | Quy mô Dataset | Số Query Test | Hit@1  | Hit@3  | MRR   | Ghi chú                                    |
+| ------------------------------------------ | -------------- | ------------- | ------ | ------ | ----- | ------------------------------------------ |
+| BM25 Only                                  | 100 phim       | 10            | 40.0%  | 66.7%  | 0.500 | Miss các câu hỏi đồng nghĩa/ngữ cảnh       |
+| Dense Vector (Voyage-3)                    | 100 phim       | 10            | 70.0%  | 80.0%  | 0.725 | Miss các câu hỏi mã số/tên riêng chính xác |
+| Full Pipeline (HyDE + RRF + Cross-Encoder) | 100 phim       | 10            | 100.0% | 100.0% | 1.000 | Re-ranker đẩy kết quả đúng lên Top 1       |
 
 ---
 
