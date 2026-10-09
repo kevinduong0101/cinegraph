@@ -1,4 +1,4 @@
-from core.indexer import bm25_search, vector_search
+from core.indexer import get_indexer
 from core.hybrid import hybrid_search, sorted_index_hybrid
 from core.ingest import load_clean_data
 from core.reranker import rerank_movies
@@ -6,21 +6,50 @@ import time
 
 df = load_clean_data()
 title_lists = df['title'].tolist()
-
+indexer = get_indexer()
 
 questions_list = [
     {
-        "query": "The movie about batman, direct by Christopher Nolan something dark knight",
+        "query": "A wedding opens a saga where power, loyalty, and family collide in the shadow of a Don's empire.",
+        "expected": "The Godfather"
+    },
+    {
+        "query": "Behind prison walls, hope is smuggled in spoonfuls over decades, until freedom tastes like rain.",
+        "expected": "The Shawshank Redemption"
+    },
+    {
+        "query": "From Little Italy to the hills of Sicily, a son walks the same dark path as his father—only deeper.",
+        "expected": "The Godfather Part II"
+    },
+    {
+        "query": "Amid the horror of the Holocaust, one man's conscience awakens, turning profit into salvation.",
+        "expected": "Schindler's List"
+    },
+    {
+        "query": "Love blooms on a European train, but destiny has already written two other names on wedding cards.",
+        "expected": "Dilwale Dulhania Le Jayenge"
+    },
+    {
+        "query": "A girl steps through a tunnel into a bathhouse for spirits, where names are stolen and dragons fly.",
+        "expected": "Spirited Away"
+    },
+    {
+        "query": "One man stands alone in a sweltering room, refusing to let twelve votes bury the truth.",
+        "expected": "12 Angry Men"
+    },
+    {
+        "query": "Under a comet's glow, two strangers wake up in each other's lives—and find a connection beyond time.",
+        "expected": "Your Name."
+    },
+    {
+        "query": "A basement family infiltrates a mansion of wealth, but the stench of inequality rises from below.",
+        "expected": "Parasite"
+    },
+    {
+        "query": "Gotham's night belongs to a clown of chaos, and only one dark knight dares to face the madness.",
         "expected": "The Dark Knight"
-    },
-    {
-        "query": "A sci-fi movie about dreams within dreams",
-        "expected": "Inception"
-    },
-    {
-        "query": "A young boy accidentally travels to the Land of the Dead",
-        "expected": "Coco"
-    }]
+    }
+]
 
 expected_movies = [movie['expected'] for movie in questions_list]
 
@@ -53,9 +82,9 @@ def check_top_movies():
 
         question = q['query']
 
-        bm25 = sorted_index_hybrid(bm25_search(question, top_k=3))
+        bm25 = sorted_index_hybrid(indexer.bm25_search(question, top_k=3))
         try:
-            vector = sorted_index_hybrid(vector_search(question,top_k=3))
+            vector = sorted_index_hybrid(indexer.vector_search(question,top_k=3))
         except Exception as e:
             vector = []
         time.sleep(20)
@@ -87,3 +116,14 @@ def check_top_movies():
 
 print(check_top_movies())
 
+# last run 
+
+#  Hit rate top 3:
+#     BM-25: 20.0%
+#     Vector: 90.0%
+#     Hybrid: 100.0%
+# ----------------------------------
+#     Mean Reciprocal Rank:
+#     BM-25: 0.200
+#     Vector: 0.717
+#     Hybrid: 0.950

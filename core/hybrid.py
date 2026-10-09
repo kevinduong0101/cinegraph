@@ -1,7 +1,6 @@
-from core.indexer import bm25_search, vector_search 
 from collections import defaultdict
 from core.hyde import generate_hypothetical_overview
-from core.indexer import movies_data
+from core.indexer import get_indexer
 from core.reranker import rerank_movies
 
 #Calculate RRF function - between bm25 vs vector 
@@ -18,6 +17,7 @@ def reciprocal_rank_fusion(bm25_results, vector_results, k=60) -> list[tuple[int
 
 #find top-10 movies 
 def hybrid_search(query: str, top_k=10):
+    indexer = get_indexer()
     #check if Gemini work well 
     try: 
         vector_query = generate_hypothetical_overview(query)
@@ -26,12 +26,12 @@ def hybrid_search(query: str, top_k=10):
         vector_query = query
     #Check Vector search
     try: 
-        vector_result = vector_search(vector_query, top_k=20)
-        result = reciprocal_rank_fusion(bm25_search(query, top_k=20), vector_result)[:top_k]
+        vector_result = indexer.vector_search(vector_query, top_k=20)
+        result = reciprocal_rank_fusion(indexer.bm25_search(query, top_k=20), vector_result)[:top_k]
         return result, vector_query
     except Exception as e: 
         print("Vector search or RRF failed; fallback to BM25 only: %s", e)
-        return bm25_search(query, top_k=top_k), vector_query
+        return indexer.bm25_search(query, top_k=top_k), vector_query
 
 #this function helps cover list tuble to list [int]
 def sorted_index_hybrid(items): 
@@ -39,6 +39,7 @@ def sorted_index_hybrid(items):
 
 
 if __name__ == "__main__": 
+    indexer = get_indexer()
     user = "A sci-fi movie about traveling through a wormhole near Saturn to save humanity"
     search, vector_query = hybrid_search(user)
     sorted_hybrid = sorted_index_hybrid(search)
@@ -46,6 +47,6 @@ if __name__ == "__main__":
     sorted_rerank = sorted_index_hybrid(rerank_top_3)
     print(f"The movie base on describe: {user}")
     for rank,idx in enumerate(sorted_rerank, start=1):
-        print(f"Top {rank}: {movies_data[idx]}")
+        print(f"Top {rank}: {indexer.movies_data[idx]}")
         print("-----------------------------")
 

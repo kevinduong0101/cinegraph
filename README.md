@@ -1,6 +1,6 @@
 # 🎬 CineGraph Intel — Multi-Stage Hybrid & Graph RAG Engine
 
-> An Enterprise-grade, Grounded Movie Retrieval-Augmented Generation (RAG) Engine combining **HyDE Query Expansion**, **Dual Indexing (BM25 + Voyage-3)**, **Cross-Encoder Re-ranking**, and **2-Hop Knowledge Graph Traversal** with **Zero-Redundancy NDJSON Streaming**.
+> An Enterprise-grade, Grounded Movie Retrieval-Augmented Generation (RAG) Engine combining **HyDE Query Expansion**, **Dual Indexing (BM25 + Voyage-3)**, **Cross-Encoder Re-ranking**, and **1-Hop Knowledge Graph Traversal** with **Zero-Redundancy NDJSON Streaming**.
 
 ---
 
@@ -31,11 +31,10 @@ flowchart TD
 
 Evaluated on realistic multi-intent movie queries (abstract concepts, character descriptions, lexical traps):
 
-| Retrieval Setup (Ablation)                 | Dataset Size | Test Queries | Hit@1  | Hit@3  | MRR   | Notes                                                        |
-| ------------------------------------------ | ------------ | ------------ | ------ | ------ | ----- | ------------------------------------------------------------ |
-| BM25 Only                                  | 100 movies   | 10           | 40.0%  | 66.7%  | 0.500 | Missed questions with similar meanings or different contexts |
-| Dense Vector (Voyage-3)                    | 100 movies   | 10           | 70.0%  | 80.0%  | 0.725 | Missed questions that required exact IDs or specific names   |
-| Full Pipeline (HyDE + RRF + Cross-Encoder) | 100 movies   | 10           | 100.0% | 100.0% | 1.000 | The re-ranker moved the correct result to the top position   |
+| Metric               | BM-25 | Vector | Hybrid |
+| -------------------- | ----- | ------ | ------ |
+| Hit rate top 3       | 20.0% | 90.0%  | 100.0% |
+| Mean Reciprocal Rank | 0.200 | 0.717  | 0.950  |
 
 ---
 

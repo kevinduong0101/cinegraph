@@ -1,20 +1,20 @@
-import os
-from google import genai 
 from core.hybrid import hybrid_search
 from core.reranker import rerank_movies
 from core.graph_enricher import enrich_movie_context
 from core.hybrid import sorted_index_hybrid
-from core.indexer import movies_data
+from core.indexer import get_indexer
 from core.graph_builder import build_movie_graph
 from core.ingest import load_clean_data
+from core.hyde import generate, generate_stream
 import json
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
 df = load_clean_data()
 load_data = build_movie_graph(df)
 
 
 def generate_movie_answer(query: str) -> dict:
+    indexer = get_indexer()
     candidates, hyde_context = hybrid_search(query)
     #find top 10 movies and get movie_id only
     top_10_movies = sorted_index_hybrid(candidates)
@@ -25,7 +25,7 @@ def generate_movie_answer(query: str) -> dict:
     #get list of titles from top 3 movies
     top_titles_movies = [title_lists[movie_id] for movie_id in top_3_movies]
     #overview 
-    overview = [movies_data[idx] for idx in top_3_movies]
+    overview = [indexer.movies_data[idx] for idx in top_3_movies]
     #Build graph lists
     graph_lists = [enrich_movie_context(load_data, movie) for movie in top_titles_movies]
 
@@ -78,13 +78,10 @@ Dữ liệu duy nhất mày được phép sử dụng để trả lời là:
 Chỉ trả về câu trả lời cuối cùng, **2,3 câu tối đa**, kèm nguồn nếu sử dụng TMDB Overview.
 """
 
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=prompt
-    )
+    response = generate(prompt)
 
     result = {
-        "answer": response.text,
+        "answer": response,
         "recommended_movies": top_titles_movies,
         "graph_context": graph_lists
     }
@@ -93,6 +90,7 @@ Chỉ trả về câu trả lời cuối cùng, **2,3 câu tối đa**, kèm ngu
     return result 
 
 def generate_movie_answer_stream(query: str): 
+    indexer = get_indexer()
     candidates, hyde_context = hybrid_search(query)
 
         #find top 10 movies and get movie_id only
@@ -104,7 +102,7 @@ def generate_movie_answer_stream(query: str):
     #get list of titles from top 3 movies
     top_titles_movies = [title_lists[movie_id] for movie_id in top_3_movies]
     #overview 
-    overview = [movies_data[idx] for idx in top_3_movies]
+    overview = [indexer.movies_data[idx] for idx in top_3_movies]
     #Build graph lists
     graph_lists = [enrich_movie_context(load_data, movie) for movie in top_titles_movies]
     prompt = f"""
@@ -148,20 +146,14 @@ def generate_movie_answer_stream(query: str):
     
     Chỉ trả về câu trả lời cuối cùng, **2,3 câu tối đa**, kèm nguồn nếu sử dụng TMDB Overview.
     """
-    response = client.models.generate_content_stream(
-        model="gemini-3.5-flash-lite",
-        contents=prompt,
-
-    )
 
     yield json.dumps({
         "recommended_movies": top_titles_movies,
         "graph_context": graph_lists,
     }, ensure_ascii=False, default=str) + "\n"
 
-    for chunk in response:
-        if chunk.text:
-            yield chunk.text
+    for chunk in generate_stream(query):
+        yield chunk
 
 
 
