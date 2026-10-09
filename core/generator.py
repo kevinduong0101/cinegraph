@@ -152,9 +152,8 @@ def generate_movie_answer_stream(query: str):
         "graph_context": graph_lists,
     }, ensure_ascii=False, default=str) + "\n"
 
-    for chunk in generate_stream(query):
+    for chunk in generate_stream(prompt):
         yield chunk
-
 
 
 if __name__ == "__main__":
